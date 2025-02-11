@@ -1,0 +1,33 @@
+# This gitlab config is set up to run behind a reverse proxy and custom exposed ssh port to avoid conflicts
+# A nginx stream might have to be set up for the ssh port to work properly for incoming connections
+
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'localhost'
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url $GITLAB_URL
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+        letsencrypt['enabled'] = false
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on",
+          "Host" => "$GITLAB_SERVER_DOMAIN",
+          "X-Real-IP" => "$$remote_addr",
+          "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+          "Upgrade" => "$$http_upgrade",
+          "Connection" => "$$connection_upgrade"
+        }
+    volumes:
+      - '$GITLAB_PATH_CONFIG:/etc/gitlab'
+      - '$GITLAB_PATH_LOGS:/var/log/gitlab'
+      - '$GITLAB_PATH_DATA:/var/opt/gitlab'
+    ports:
+      - '8888:80'
+      - '2424:22'
+

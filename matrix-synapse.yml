@@ -1,0 +1,35 @@
+# I will probably later on when I have the time also put a coturn server setup in here as well as possibly upload 
+# my synapse config files (requires a bit tinkering with reverse proxy)
+
+version: '3.3'
+
+services:
+  synapse:
+    container_name: synapse
+    image: matrixdotorg/synapse:latest
+    restart: always
+    ports: 
+      - 8008:8008
+    volumes:
+      - $MATRIX_PATH_DATA:/data
+
+  synapse-admin:
+    container_name: synapse-admin
+    hostname: synapse-admin
+    image: awesometechnologies/synapse-admin:latest
+    # build:
+    #   context: .
+
+    # to use the docker-compose as standalone without a local repo clone,
+    # replace the context definition with this:
+    # context: https://github.com/Awesome-Technologies/synapse-admin.git
+
+    #  args:
+    #    - BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
+    #    if you're building on an architecture other than amd64, make sure
+    #    to define a maximum ram for node. otherwise the build will fail.
+    #    - NODE_OPTIONS="--max_old_space_size=1024"
+    #    - BASE_PATH="/synapse-admin"
+    ports:
+      - "8080:80"
+    restart: unless-stopped

@@ -1,0 +1,21 @@
+services:
+  open-webui:
+    build:
+      context: .
+      args:
+        OLLAMA_BASE_URL: 'OLLAMA_BASE_URL=$OLLAMA_URL'
+      dockerfile: Dockerfile
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    volumes:
+      - $OPENWEBUI_PATH_DATA:/app/backend/data
+    ports:
+      - 4000:8080
+    environment:
+      - 'OLLAMA_BASE_URL=$OLLAMA_URL'
+      #- 'WEBUI_SECRET_KEY=' --> Not safe for production environments to leave empty
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
+    # If running ollama instance on same device, use the following:
+    # NetworkMode: host
