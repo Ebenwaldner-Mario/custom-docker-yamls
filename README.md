@@ -1,7 +1,7 @@
 # custom-docker-yamls
 Collection of some of my docker-compose files to keep easily available if needed again. Some have heavy custom configurations, some others are just the provided docker-compose files by the image creators.
 
-# My hosting List
+# My hosting list
 My personal must haves to build up a reliable home system. I recommend running as much as possible in docker containers to increase security and easen managment.
 
 ## Machine managment
