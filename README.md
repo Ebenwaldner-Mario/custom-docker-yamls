@@ -1,6 +1,6 @@
 # custom-docker-yamls
 Collection of some of my docker-compose files to keep easily available if needed again. Some have heavy custom configurations, some others are just the provided docker-compose files by the image creators.
-An illustration of my personal home network structure can be found [here](https://github.com/Ebenwaldner-Mario/custom-docker-yamls/edit/main/home-network.svg)
+An illustration of my personal home network structure can be found [here](https://github.com/Ebenwaldner-Mario/custom-docker-yamls/blob/main/home-network.pdf).
 
 # My hosting list
 My personal must haves to build up a reliable home system. I recommend running as much as possible in docker containers to increase security and easen managment.
