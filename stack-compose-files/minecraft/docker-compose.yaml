@@ -1,0 +1,11 @@
+services:
+  minecraft-server:
+    container_name: minecraft-server
+    image: itzg/minecraft-server
+    volumes:
+      - ${PATH_MINECRAFT_DATA}:/data
+    ports:
+      - "25565:25565"
+    environment:
+      - EULA=TRUE
+    restart: always

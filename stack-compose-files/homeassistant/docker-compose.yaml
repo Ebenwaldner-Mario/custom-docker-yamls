@@ -3,11 +3,12 @@ services:
     container_name: homeassistant
     image: "ghcr.io/home-assistant/home-assistant:stable"
     volumes:
-      - $HOMEASSISTANT_PATH_CONFIG:/config
+      - ${PATH_HOMEASSISTANT_CONFIG}:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     restart: unless-stopped
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      - /dev/hci0:/dev/hci0
     privileged: true
     network_mode: host
-    devices:
-      - /dev/ttyUSB0 # Example of my Zigbee 3.0 usb module being exposed to the container
