@@ -1,0 +1,178 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      # Web UI ports exposed via VPN container
+      - "8080:8080"       # qBittorrent Web UI
+      - "8989:8989"       # Sonarr
+      - "7878:7878"       # Radarr
+      - "9696:9696"       # Prowlarr
+      - "6767:6767"       # Bazarr
+      - "8191:8191"       # FlareSolverr
+      - "8265:8265"       # Tdarr Web UI
+      - "8266:8266"       # Tdarr server
+      - "11011:11011"     # Cleanuparr
+      #- "8686:8686"       # Lidarr
+    volumes:
+      - ${PATH_GLUETUN}:/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_ADDRESSES=${WG_ADDRESSES}
+      - WIREGUARD_DNS=${WG_DNS}
+      - WIREGUARD_PRIVATE_KEY=${WG_PRIVATE_KEY}
+      - SERVER_COUNTRIES=${WG_COUNTRY}
+      - TZ
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.8.0/24  # LAN allowed to bypass VPN
+    restart: unless-stopped
+
+
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID
+      - PGID
+      - TZ
+      - WEBUI_PORT=8080
+    volumes:
+      - ${PATH_QBITTORRENT_CONFIG}:/config
+      - ${PATH_QBITTORRENT_DOWNLOADS}:/downloads
+    restart: unless-stopped
+
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${PATH_SONARR_CONFIG}:/config
+      - ${PATH_QBITTORRENT_DOWNLOADS}:/downloads
+      - ${PATH_MEDIA_SHOWS}:/shows
+    restart: unless-stopped
+
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${PATH_RADARR_CONFIG}:/config
+      - ${PATH_QBITTORRENT_DOWNLOADS}:/downloads
+      - ${PATH_MEDIA_MOVIES}:/movies
+    restart: unless-stopped
+
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${PATH_PROWLARR_CONFIG}:/config
+    restart: unless-stopped
+
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${PATH_BAZARR_CONFIG}:/config
+      - ${PATH_QBITTORRENT_DOWNLOADS}:/downloads
+      - ${PATH_MEDIA_SHOWS}:/shows
+      - ${PATH_MEDIA_MOVIES}:/movies
+    restart: unless-stopped
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - TZ
+      - LOG_LEVEL=info
+    restart: unless-stopped
+
+
+  tdarr:
+    container_name: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    environment:
+      - TZ
+      - PUID
+      - PGID
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=7
+      - nodeName=MyInternalNode
+    volumes:
+      - ${PATH_TDARR_SERVER}:/app/server
+      - ${PATH_TDARR_CONFIGS}:/app/configs
+      - ${PATH_TDARR_LOGS}:/app/logs
+      - ${PATH_MEDIA_MOVIES}:/movies
+      - ${PATH_MEDIA_SHOWS}:/shows
+      - ${PATH_TDARR_TRANSCODE_CACHE}:/temp
+    devices:
+      - /dev/dri:/dev/dri 
+
+  cleanuparr:
+    container_name: cleanuparr
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    environment:
+      - PORT=11011
+      - PUID
+      - PGID
+      - TZ
+    volumes:
+      - ${PATH_CLEANUPARR_CONFIG}:/config
+
+  # lidarr:
+  #   image: lscr.io/linuxserver/lidarr:latest
+  #   container_name: lidarr
+  #   #network_mode: "service:gluetun"
+  #   ports:
+  #     - "8686:8686"
+  #   environment:
+  #     - PUID
+  #     - PGID
+  #     - TZ
+  #   volumes:
+  #     - ${PATH_LIDARR_CONFIG}:/config
+  #     - ${PATH_MEDIA_MUSIC}:/music #optional
+  #     - ${PATH_QBITTORRENT_DOWNLOADS}:/downloads #optional
+  #   restart: unless-stopped

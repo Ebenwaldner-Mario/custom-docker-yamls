@@ -1,0 +1,22 @@
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+    volumes:
+      - ${PATH_NGINX_PROXY_MANAGER_DATA}:/data
+      - ${PATH_NGINX_PROXY_MANAGER_LETSENCRYPT}:/etc/letsencrypt
+    networks:
+      mynet:
+        ipv4_address: 172.40.0.3 # Needed for inter-container communication to be consistend (allowed proxies by home assistant for example)
+
+networks:
+  mynet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.40.0.0/24

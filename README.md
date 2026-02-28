@@ -33,3 +33,11 @@ My personal must haves to build up a reliable home system. I recommend running a
 - Feishin
 - Metube
 - Nextcloud AIO
+
+## Not listed Services in compose files
+(Mostly due to different hypervisor setup like TrueNAS Apps or being too simple to justify a custom compose file)
+- Beszel (simple setup)
+- Immich (TrueNAS Apps)
+- Nextcloud (TrueNAS Apps)
+- Jellyfin (TrueNAS Apps)
+- paperless-ngx (TrueNAS Apps)
