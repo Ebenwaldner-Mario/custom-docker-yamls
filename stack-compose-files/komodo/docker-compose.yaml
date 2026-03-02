@@ -11,8 +11,9 @@ services:
     volumes:
       - ${PATH_KOMODO_DB_DATA}:/data/db
       - ${PATH_KOMODO_DB_CONFIG}:/data/configdb
-    env_file:
-      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${KOMODO_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${KOMODO_DB_PASSWORD}
 
   core:
     image: ghcr.io/moghtech/komodo-core:latest
@@ -24,10 +25,18 @@ services:
       - mongo
     ports:
       - 9120:9120
-    env_file:
-      - .env
     volumes:
       - ${COMPOSE_KOMODO_BACKUPS_PATH}:/backups
+    environment:
+      KOMODO_DATABASE_ADDRESS: ${KOMODO_DATABASE_ADDRESS}
+      KOMODO_DATABASE_USERNAME: ${KOMODO_DB_USERNAME}
+      KOMODO_DATABASE_PASSWORD: ${KOMODO_DB_PASSWORD}
+      KOMODO_PASSKEY: ${KOMODO_PASSKEY}
+      KOMODO_OIDC_ENABLED: true
+      KOMODO_OIDC_PROVIDER: ${KOMODO_OIDC_PROVIDER}
+      KOMODO_OIDC_CLIENT_ID: ${KOMODO_OIDC_CLIENT_ID}
+      KOMODO_OIDC_CLIENT_SECRET: ${KOMODO_OIDC_CLIENT_SECRET}
+      KOMODO_HOST: ${KOMODO_HOST}
 
   periphery:
     image: ghcr.io/moghtech/komodo-periphery:latest
@@ -43,5 +52,5 @@ services:
       ## or docker will get confused. See https://github.com/moghtech/komodo/discussions/180.
       ## Default: /etc/komodo.
       - ${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}:${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}
-    env_file:
-      - .env
+    environment:
+      PERIPHERY_PASSKEYS: ${PERIPHERY_PASSKEYS}
