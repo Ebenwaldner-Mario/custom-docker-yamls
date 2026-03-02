@@ -1,0 +1,51 @@
+
+services:
+  synapse:
+    container_name: synapse
+    image: matrixdotorg/synapse:latest
+    restart: always
+    ports: 
+      - 8448:8448
+    volumes:
+      - ${PATH_MATRIX_DATA}:/data:rw
+    environment:
+      - GID=0
+      - UID=0
+    healthcheck:
+      disable: true
+    networks:
+      - matrixnet
+
+  synapse-admin:
+    container_name: synapse-admin
+    hostname: synapse-admin
+    image: awesometechnologies/synapse-admin:latest
+    # profiles:
+    #   - donotstart
+    environment:
+      - SYNAPSE_SERVER_URL=http://synapse:8008
+    ports:
+      - '12080:80'
+    restart: unless-stopped
+    networks:
+      - matrixnet
+
+  coturn:
+    container_name: coturn
+    image: coturn/coturn:latest
+    ports:
+      - '3478:3478'
+      - '3478:3478/udp'
+      - '5349:5349'
+      - '5349:5349/udp'
+    volumes:
+      - ${PATH_COTURN_ETC}:/etc:rw
+      - ${PATH_COTURN_LOG}:/var/log/turnserver:rw
+
+    restart: unless-stopped
+    networks:
+      - matrixnet
+
+networks:
+  matrixnet:
+    driver: bridge
