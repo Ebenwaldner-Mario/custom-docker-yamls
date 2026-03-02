@@ -1,0 +1,47 @@
+# Important: Substitute your environment file
+
+services:
+  mongo:
+    image: mongo
+    container_name: komodo-db
+    labels:
+      komodo.skip:
+    command: --quiet --wiredTigerCacheSizeGB 0.25
+    restart: unless-stopped
+    volumes:
+      - ${PATH_KOMODO_DB_DATA}:/data/db
+      - ${PATH_KOMODO_DB_CONFIG}:/data/configdb
+    env_file:
+      - .env
+
+  core:
+    image: ghcr.io/moghtech/komodo-core:latest
+    container_name: komodo-core
+    labels:
+      komodo.skip:
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - 9120:9120
+    env_file:
+      - .env
+    volumes:
+      - ${COMPOSE_KOMODO_BACKUPS_PATH}:/backups
+
+  periphery:
+    image: ghcr.io/moghtech/komodo-periphery:latest
+    container_name: komodo-periphery
+    labels:
+      komodo.skip:
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/proc
+      ## Specify the Periphery agent root directory.
+      ## Must be the same inside and outside the container,
+      ## or docker will get confused. See https://github.com/moghtech/komodo/discussions/180.
+      ## Default: /etc/komodo.
+      - ${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}:${PERIPHERY_ROOT_DIRECTORY:-/etc/komodo}
+    env_file:
+      - .env
