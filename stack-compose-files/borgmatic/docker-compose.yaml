@@ -1,0 +1,18 @@
+services:
+  borgmatic:
+    image: ghcr.io/borgmatic-collective/borgmatic:latest
+    container_name: borgmatic
+    restart: unless-stopped
+    volumes:
+      - ${PATH_BORGMATIC_D}:/etc/borgmatic.d
+      - ${PATH_BORGMATIC_REPOSITORY}:/mnt/borg-repository
+      - ${PATH_BORGMATIC_SOURCE}:/mnt/source
+      - ${PATH_BORGMATIC_CACHE}:/root/.cache/borg
+      - ${PATH_BORGMATIC_CONFIG}:/root/.config/borg
+      - ${PATH_BORGATIC_STATE}:/root/.local/state/borgmatic
+      - ${PATH_BORGMATIC_SSH}:/root/.ssh
+    environment:
+      - TZ=${TZ}
+      - BACKUP_CRON=${BACKUP_CRON}
+      - BORG_PASSPHRASE=${BORG_PASSPHRASE}
+      - RUN_ON_STARTUP=${RUN_ON_STARTUP}

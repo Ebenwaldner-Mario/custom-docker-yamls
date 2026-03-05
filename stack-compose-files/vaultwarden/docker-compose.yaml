@@ -1,0 +1,18 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    volumes:
+      - ${PATH_VAULTWARDEN_DATA}:/data
+    ports:
+      - ${VAULTWARDEN_DOCKER_PORT}:80
+    environment:
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+      - ROCKET_ADDRESS=${ROCKET_ADDRESS}
+      - ROCKET_PORT=80
+      - ROCKET_PROFILE=release
+      # My yubikey stuff :)
+      - YUBICO_CLIENT_ID=${YUBICO_CLIENT_ID}
+      - YUBICO_SECRET_KEY=${YUBICO_SECRET_KEY}
