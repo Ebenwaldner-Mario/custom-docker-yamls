@@ -1,0 +1,20 @@
+services:
+  factorio:
+    image: factoriotools/factorio:latest:752025f81b5ec1229919edc869f9c8773db4bb548a90d370f85938236c857d9a
+    container_name: factorio
+    ports:
+      - "34197:34197/udp"
+    volumes:
+      - ${PATH_FACTORIO_DATA}:/factorio
+    restart: unless-stopped
+    environment:
+      - CONFIG=/factorio/config
+      - DLC_SPACE_AGE=true
+      - MEMORY=12G
+      - MODS=/factorio/mods
+      - PGID=845
+      - PUID=845
+      - RCON_PORT=27015
+      - SAVES=/factorio/saves
+      - SCENARIOS=/factorio/scenarios
+      - SCRIPTOUTPUT=/factorio/script-output

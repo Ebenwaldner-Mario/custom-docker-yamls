@@ -1,0 +1,22 @@
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    restart: unless-stopped
+    ports:
+      - 4533:4533
+    volumes:
+      - ${PATH_NAVIDROME_MUSIC}:/music
+      - ${PATH_NAVIDROME_DATA}:/data
+    environment:
+      - ND_BASEURL=${ND_BASEURL}
+      - ND_PORT=${ND_PORT}
+      - ND_REVERSEPROXYWHITELIST=${ND_REVERSEPROXYWHITELIST}
+      - ND_DATAFOLDER=${ND_DATAFOLDER}
+      - ND_MUSICFOLDER=${ND_MUSICFOLDER}
+      - ND_CONFIGFILE=${ND_CONFIGFILE}
+      - ND_LOGLEVEL=${ND_LOGLEVEL}
+      - ND_SCANSCHEDULE=${ND_SCANSCHEDULE}
+      - ND_SESSIONTIMEOUT=${ND_SESSIONTIMEOUT}
+      - PGID=${PGID}
+      - PUID=${PUID}

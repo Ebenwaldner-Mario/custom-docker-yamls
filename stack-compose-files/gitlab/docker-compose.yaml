@@ -1,0 +1,30 @@
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: unless-stopped
+    hostname: 'localhost'
+    container_name: gitlab-ce
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${EXTERNAL_URL}'
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SHELL_SSH_PORT}
+        letsencrypt['enabled'] = ${SSL_ENABLED}
+        nginx['listen_port'] = ${NGINX_LISTEN_PORT}
+        nginx['listen_https'] = ${NGINX_LISTEN_HTTPS}
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on",
+          "Host" => "${HOST_DOMAIN}",
+          "X-Real-IP" => "$$remote_addr",
+          "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+          "Upgrade" => "$$http_upgrade",
+          "Connection" => "$$connection_upgrade"
+        }
+    volumes:
+      - ${PATH_GITLAB_CONFIG}:/etc/gitlab
+      - ${PATH_GITLAB_LOGS}:/var/log/gitlab
+      - ${PATH_GITLAB_DATA}:/var/opt/gitlab
+    ports:
+      - ${NGINX_LISTEN_PORT_EXTERNAL}:${NGINX_LISTEN_PORT}
+      - ${GITLAB_SHELL_SSH_PORT}:22
+    

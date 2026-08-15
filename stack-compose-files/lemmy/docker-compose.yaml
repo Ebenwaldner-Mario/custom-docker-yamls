@@ -1,0 +1,88 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  proxy:
+    image: nginx:1-alpine
+    ports:
+      # Listen for outside connections on port 10633. You can freely change the left-side
+      # number to a different port, eg using port 80 if you don't need a reverse proxy.
+      - "10633:8536"
+    volumes:
+      - ${PATH_LEMMY_NGINX_CONFIG_FILE}:/etc/nginx/nginx.conf:ro
+      - ${PATH_LEMMY_NGINX_PROXY_PARAMS}:/etc/nginx/proxy_params:ro
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - pictrs
+      - lemmy-ui
+
+  lemmy:
+    image: dessalines/lemmy:0.19.9
+    hostname: lemmy
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      - RUST_LOG="warn"
+    volumes:
+      - ${PATH_LEMMY_CONFIG_FILE}:/config/config.hjson
+    depends_on:
+      - postgres
+      - pictrs
+
+  lemmy-ui:
+    image: dessalines/lemmy-ui:0.19.9
+    environment:
+      - LEMMY_UI_LEMMY_INTERNAL_HOST=lemmy:8536
+      - LEMMY_UI_LEMMY_EXTERNAL_HOST=${LEMMY_UI_LEMMY_EXTERNAL_HOST}
+      - LEMMY_UI_HTTPS=true
+    volumes:
+      - ${PATH_LEMMY_UI_EXTRA_THEMES}:/app/extra_themes
+    depends_on:
+      - lemmy
+    restart: unless-stopped
+    logging: *default-logging
+
+  pictrs:
+    image: asonix/pictrs:0.5.16
+    # this needs to match the pictrs url in lemmy.hjson
+    hostname: pictrs
+    # we can set options to pictrs like this, here we set max. image size and forced format for conversion
+    # entrypoint: /sbin/tini -- /usr/local/bin/pict-rs -p /mnt -m 4 --image-format webp
+    environment:
+      - PICTRS_OPENTELEMETRY_URL=http://otel:4137
+      - PICTRS__SERVER__API_KEY=rPeQ82e2enw04e
+      - RUST_BACKTRACE=full
+      - PICTRS__MEDIA__VIDEO__VIDEO_CODEC=vp9
+      - PICTRS__MEDIA__ANIMATION__MAX_WIDTH=256
+      - PICTRS__MEDIA__ANIMATION__MAX_HEIGHT=256
+      - PICTRS__MEDIA__ANIMATION__MAX_FRAME_COUNT=400
+    user: 991:991
+    volumes:
+      - ${PATH_LEMMY_PICTRS}:/mnt
+    restart: unless-stopped
+    logging: *default-logging
+
+  postgres:
+    image: pgautoupgrade/pgautoupgrade:17-alpine
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    shm_size: 1g
+    volumes:
+      - ${PATH_LEMMY_POSTGRES_DATA}:/var/lib/postgresql/data
+      - ${PATH_LEMMY_POSTGRES_CONFIG_FILE}:/etc/postgresql.conf
+    restart: unless-stopped
+    logging: *default-logging
+
+  postfix:
+    image: mwader/postfix-relay
+    environment:
+      - POSTFIX_myhostname=${POSTFIX_MYHOSTNAME}
+    restart: unless-stopped
+    logging: *default-logging

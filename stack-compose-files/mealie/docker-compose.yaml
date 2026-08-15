@@ -1,0 +1,17 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    restart: unless-stopped
+    ports:
+      - 9925:${APP_PORT}
+    volumes:
+      - ${PATH_MEALIE_DATA}:/app/data
+    environment:
+      - TZ=${TZ}
+      - ALLOW_SIGNUP=${ALLOW_SIGNUP}
+      - APP_PORT=${APP_PORT}
+      - PRODUCTION=true
+      - PGID=1000
+      - PUID=1000
+      - MEALIE_HOME=/app
