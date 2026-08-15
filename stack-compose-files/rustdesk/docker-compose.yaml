@@ -1,0 +1,20 @@
+services:
+  hbbs:
+    container_name: rustdesk-hbbs
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r ${IP_RUSTDESK_HBBR}:21117
+    volumes:
+      - ${PATH_RUSTDESK_HBBS_DATA}:/root:rw
+    depends_on:
+      - hbbr
+    network-mode: "host"
+    restart: unless-stopped
+
+  hbbr:
+    container_name: rustdesk-hbbr
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr
+    volumes:
+      - ${PATH_RUSTDESK_HBBR_DATA}:/root:rw
+    network-mode: "host"
+    restart: unless-stopped
