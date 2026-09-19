@@ -1,0 +1,14 @@
+crowdsec_engine:
+  image: crowdsecurity/crowdsec
+  container_name: crowdsec_engine
+  restart: always
+  ports:
+    - ${CROWDSEC_ENGINE_PORT}:8080
+  environment:
+    COLLECTIONS: "crowdsecurity/nginx"
+    GID: "${GID-1000}"
+  volumes:
+    # - ${PATH_CROWDSEC_ENGINE_AQUIS}:/etc/crowdsec/acquis.yaml
+    - ${PATH_NGINX_LOGS}:/var/log/nginx
+    - ${PATH_CROWDSEC_ENGINE_DATA}:/var/lib/crowdsec/data/
+    - ${PATH_CROWDSEC_ENGINE_CONFIG}:/etc/crowdsec/
